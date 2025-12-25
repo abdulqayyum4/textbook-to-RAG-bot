@@ -1,0 +1,246 @@
+openapi: 3.0.0
+info:
+  title: VLA Educational Content API
+  description: API for accessing Vision-Language-Action educational content
+  version: 1.0.0
+servers:
+  - url: https://vla-education.example.com/api
+    description: VLA Educational Content API Server
+
+paths:
+  /vla-modules:
+    get:
+      summary: Get all VLA modules
+      description: Retrieve a list of all Vision-Language-Action educational modules
+      responses:
+        '200':
+          description: List of VLA modules
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  modules:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VLAModule'
+
+  /vla-modules/{moduleId}:
+    get:
+      summary: Get specific VLA module
+      description: Retrieve details of a specific Vision-Language-Action module
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the VLA module
+      responses:
+        '200':
+          description: Details of the VLA module
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VLAModule'
+        '404':
+          description: Module not found
+
+  /vla-modules/{moduleId}/chapters:
+    get:
+      summary: Get chapters of a VLA module
+      description: Retrieve all chapters of a specific VLA module
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the VLA module
+      responses:
+        '200':
+          description: List of chapters in the VLA module
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chapters:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VLAChapter'
+
+  /vla-modules/{moduleId}/chapters/{chapterId}:
+    get:
+      summary: Get specific chapter
+      description: Retrieve content of a specific chapter in a VLA module
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the VLA module
+        - name: chapterId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID of the chapter
+      responses:
+        '200':
+          description: Content of the VLA chapter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VLAChapter'
+        '404':
+          description: Chapter not found
+
+  /vla-concepts:
+    get:
+      summary: Get VLA concepts
+      description: Retrieve a list of Vision-Language-Action concepts covered in the modules
+      responses:
+        '200':
+          description: List of VLA concepts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  concepts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/VLAConcept'
+
+components:
+  schemas:
+    VLAModule:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the module
+        title:
+          type: string
+          description: Title of the VLA module
+        description:
+          type: string
+          description: Brief description of the module
+        targetAudience:
+          type: string
+          description: Target audience for the module (e.g., "15-25")
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/VLAChapter'
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    VLAChapter:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the chapter
+        title:
+          type: string
+          description: Title of the chapter
+        content:
+          type: string
+          description: Markdown content of the chapter
+        concepts:
+          type: array
+          items:
+            $ref: '#/components/schemas/VLAConcept'
+        diagrams:
+          type: array
+          items:
+            $ref: '#/components/schemas/VLADiagram'
+        examples:
+          type: array
+          items:
+            $ref: '#/components/schemas/VLAExample'
+        prerequisites:
+          type: array
+          items:
+            type: string
+          description: List of prerequisite concepts or chapters
+        learningObjectives:
+          type: array
+          items:
+            type: string
+          description: Learning objectives for the chapter
+
+    VLAConcept:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the concept
+        name:
+          type: string
+          description: Name of the VLA concept
+        description:
+          type: string
+          description: Detailed description of the concept
+        category:
+          type: string
+          enum: [llm-robot-convergence, cognitive-planning, vla-capstone, vision, language, action]
+          description: Category of the concept
+        relatedConcepts:
+          type: array
+          items:
+            type: string
+          description: IDs of related concepts
+
+    VLADiagram:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the diagram
+        title:
+          type: string
+          description: Title of the diagram
+        description:
+          type: string
+          description: Description of what the diagram illustrates
+        imageUrl:
+          type: string
+          format: uri
+          description: URL to the diagram image
+        type:
+          type: string
+          enum: [architecture, flowchart, conceptual, process]
+          description: Type of diagram
+
+    VLAExample:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the example
+        title:
+          type: string
+          description: Title of the example
+        description:
+          type: string
+          description: Description of the example
+        code:
+          type: string
+          description: Code example (if applicable)
+        explanation:
+          type: string
+          description: Explanation of the example
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Difficulty level of the example

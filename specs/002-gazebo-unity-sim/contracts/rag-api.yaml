@@ -1,0 +1,178 @@
+openapi: 3.0.0
+info:
+  title: Simulation Content RAG API
+  description: API for indexing and retrieving educational content about Gazebo and Unity simulation
+  version: 1.0.0
+
+paths:
+  /content/index:
+    post:
+      summary: Index simulation educational content
+      description: Submit content for indexing in the RAG system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentChunk'
+      responses:
+        '200':
+          description: Content successfully indexed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  chunkId:
+                    type: string
+                    example: "chunk-12345"
+        '400':
+          description: Invalid content format
+
+  /content/search:
+    post:
+      summary: Search simulation educational content
+      description: Search for relevant content based on query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query:
+                  type: string
+                  description: Search query
+                  example: "How does Gazebo simulate physics"
+                context:
+                  type: string
+                  enum: [full_book, selected_text]
+                  description: Search context
+                  default: "full_book"
+                maxResults:
+                  type: integer
+                  description: Maximum number of results to return
+                  default: 5
+                platformFilter:
+                  type: string
+                  enum: [gazebo, unity, both]
+                  description: Filter results by platform focus
+                  default: "both"
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SearchResult'
+        '400':
+          description: Invalid search parameters
+
+  /content/validate:
+    post:
+      summary: Validate simulation content for RAG indexing
+      description: Check if content is properly formatted for RAG system
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentChunk'
+      responses:
+        '200':
+          description: Validation results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isValid:
+                    type: boolean
+                  issues:
+                    type: array
+                    items:
+                      type: string
+
+components:
+  schemas:
+    ContentChunk:
+      type: object
+      required:
+        - id
+        - title
+        - content
+        - metadata
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the content chunk
+        title:
+          type: string
+          description: Title of the content chunk
+        content:
+          type: string
+          description: The actual content to be indexed
+        metadata:
+          type: object
+          description: Metadata about the content
+          properties:
+            chapter:
+              type: string
+              description: Chapter this content belongs to
+            section:
+              type: string
+              description: Section within the chapter
+            difficulty:
+              type: string
+              enum: [beginner, intermediate]
+              description: Difficulty level
+            concepts:
+              type: array
+              items:
+                type: string
+              description: Key concepts covered in the content
+            targetAudience:
+              type: array
+              items:
+                type: string
+              description: Target audience for this content
+            platform:
+              type: string
+              enum: [gazebo, unity, both]
+              description: Primary platform focus of the content
+            simulationCategory:
+              type: string
+              enum: [physics, rendering, sensors, environment]
+              description: Category of simulation concept
+
+    SearchResult:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the result
+        title:
+          type: string
+          description: Title of the content
+        content:
+          type: string
+          description: Relevant content snippet
+        source:
+          type: string
+          description: Source location of the content
+        relevance:
+          type: number
+          format: float
+          description: Relevance score (0-1)
+        platform:
+          type: string
+          enum: [gazebo, unity, both]
+          description: Platform focus of the content
